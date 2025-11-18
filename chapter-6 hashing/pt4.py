@@ -1,40 +1,62 @@
-#  chapter - Double hashing
-# Double hashing is an open addressing collision resolution technique in hashing.
-# If collision occurs at the main hash index, we use a second hash function (h2) to calculate the step size for probing the next index.
-# It reduces clustering and gives better distribution.
+# chapter - implementation of open addressing  
 
-class DoubleHashing:
-    def __init__(self, size):
-        self.size = size
-        self.table = [None] * size
+class MyHash:
+    def __init__(self, c):
+        self.cap = c
+        self.table = [-1] * c
+        self.size = 0
 
-    def h1(self, key):
-        return key % self.size
+    def hash(self, x):
+        return x % self.cap
 
-    def h2(self, key):
-        return 6 - (key % 6)  # Ensure this never returns 0
+    def search(self, x):
+        h = self.hash(x)
+        t = self.table
+        i = h
+        while t[i] != -1:
+            if t[i] == x:
+                return True
+            i = (i + 1) % self.cap
+            if i == h:
+                return False
+        return False
 
-    def insert(self, key):
-        index = self.h1(key)
-        if self.table[index] is None:
-            self.table[index] = key
-        else:
-            i = 1
-            new_index = (index + i * self.h2(key)) % self.size
-            while self.table[new_index] is not None:
-                i += 1
-                new_index = (index + i * self.h2(key)) % self.size
-            self.table[new_index] = key
+    def insert(self, x):
+        if self.size == self.cap:
+            return False
 
-    def display(self):
-        for i in range(self.size):
-            print(f"Index {i}: {self.table[i]}")
+        if self.search(x) == True:
+            return False
+        i = self.hash(x)
+        t = self.table
+        while t[i] not in (-1, -2):
+            i = (i + 1) % self.cap
+
+        t[i] = x
+        self.size = self.size + 1
+        return True
+
+    def remove(self, x):
+        h = self.hash(x)
+        t = self.table
+        i = h
+        while t[i] != -1:
+            if t[i] == x:
+                t[i] = -2
+                return True
+            i = (i + 1) % self.cap
+            if i == h:
+                return False
+        return False
 
 
-hash_table = DoubleHashing(7)
-hash_table.insert(49)
-hash_table.insert(56)
-hash_table.insert(72)
-hash_table.display()
-
-
+h = MyHash(7)
+h.insert(70)
+h.insert(71)
+h.insert(9)
+h.insert(56)
+h.insert(72)
+print(h.search(56))
+h.remove(56)
+print(h.search(56))
+h.remove(56)
